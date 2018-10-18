@@ -1326,6 +1326,24 @@
             value = value.substr(0, max$1);
           }
 
+          switch (schema.format) {
+            case 'date-time':
+            case 'datetime':
+              value = new Date(value).toISOString();
+              break;
+
+            case 'date':
+              value = new Date(value).toISOString().substr(0, 10);
+              break;
+
+            case 'time':
+              value = new Date(value).toISOString().substr(11);
+              break;
+
+            default:
+              break;
+          }
+
           break;
         }
 
@@ -1826,7 +1844,7 @@
     var length = random.number(minItems, maxItems, 1, 5);
 
     if (optionalsProbability !== false) {
-      length = fixedProbabilities ? Math.round(maxItems * optionalsProbability) : random.number(minItems, maxItems * optionalsProbability);
+      length = fixedProbabilities ? Math.round((maxItems || length) * optionalsProbability) : Math.abs(random.number(minItems, maxItems) * optionalsProbability);
     } // TODO below looks bad. Should additionalItems be copied as-is?
 
 
@@ -2461,7 +2479,7 @@
 
   function run(refs, schema, container) {
     try {
-      var result = traverse(schema, [], function reduce(sub, maxReduceDepth, parentSchemaPath) {
+      var result = traverse(utils.merge({}, schema), [], function reduce(sub, maxReduceDepth, parentSchemaPath) {
         if (typeof maxReduceDepth === 'undefined') {
           maxReduceDepth = random.number(1, 3);
         }
